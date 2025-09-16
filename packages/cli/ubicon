@@ -1,0 +1,82 @@
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select";
+import { motion } from "framer-motion";
+
+const LEN_OPTIONS = [
+  { label: "75x13mm", code: "75x13" },
+  { label: "95x14mm", code: "95x14" },
+  { label: "120x15mm", code: "120x15" },
+  { label: "150x15mm", code: "150x15" },
+];
+
+export default function UbiconCalculator() {
+  const [area, setArea] = useState(0);
+  const [perimeter, setPerimeter] = useState(0);
+  const [length, setLength] = useState(2.5);
+  const [selectedLen, setSelectedLen] = useState(LEN_OPTIONS[0].code);
+  const [result, setResult] = useState(null);
+
+  const handleCalculate = () => {
+    let p = perimeter > 0 ? perimeter : Math.sqrt(area) * 4;
+    let totalMeters = p * 1.05;
+    let totalPieces = Math.ceil(totalMeters / length);
+    setResult({ p: p.toFixed(2), totalMeters: totalMeters.toFixed(2), totalPieces });
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-orange-50 p-4">
+      <Card className="w-full max-w-md shadow-xl rounded-2xl">
+        <CardContent className="space-y-4 p-6">
+          <motion.h1 initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="text-2xl font-bold text-center text-orange-600">
+            UBICON – TÍNH VẬT TƯ LEN CHÂN TƯỜNG
+          </motion.h1>
+
+          <div className="space-y-2">
+            <label className="text-sm font-semibold">Chọn mẫu len</label>
+            <Select value={selectedLen} onValueChange={setSelectedLen}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Chọn mẫu" />
+              </SelectTrigger>
+              <SelectContent>
+                {LEN_OPTIONS.map((opt) => (
+                  <SelectItem key={opt.code} value={opt.code}>{opt.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-semibold">Diện tích phòng (m²)</label>
+            <Input type="number" value={area} onChange={(e) => setArea(parseFloat(e.target.value) || 0)} placeholder="Ví dụ: 20" />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-semibold">Chu vi phòng (m) (nếu có)</label>
+            <Input type="number" value={perimeter} onChange={(e) => setPerimeter(parseFloat(e.target.value) || 0)} placeholder="Bỏ trống nếu không có" />
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-semibold">Chiều dài 1 thanh (m)</label>
+            <Input type="number" step="0.1" value={length} onChange={(e) => setLength(parseFloat(e.target.value) || 2.5)} />
+          </div>
+
+          <Button onClick={handleCalculate} className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl">
+            Tính vật tư
+          </Button>
+
+          {result && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white p-4 rounded-xl shadow-md mt-4">
+              <p><strong>Mẫu len:</strong> {selectedLen}</p>
+              <p><strong>Chu vi ước tính:</strong> {result.p} m</p>
+              <p><strong>Tổng mét dài (cộng 5% hao hụt):</strong> {result.totalMeters} m</p>
+              <p><strong>Số thanh cần mua:</strong> {result.totalPieces} thanh</p>
+            </motion.div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
